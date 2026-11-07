@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DivisionController;
+use App\Http\Controllers\Staff\DailyLogController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\PinController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -14,11 +16,16 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', fn () => redirect()->route(auth()->user()->role->homeRoute()));
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    Route::put('/pin', [PinController::class, 'update'])->middleware('throttle:5,1')->name('pin.update');
+
 });
 
-Route::middleware(['auth', 'role:staff'])->get('/staff', fn () =>
-    view('dashboard', ['title' => 'Dashboard Staff'])
-)->name('staff.dashboard');
+Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/', [DailyLogController::class, 'index'])->name('dashboard');
+    Route::get('/riwayat', [DailyLogController::class, 'history'])->name('history');
+    Route::post('/log', [DailyLogController::class, 'store'])->name('logs.store');
+    Route::put('/log', [DailyLogController::class, 'update'])->name('logs.update');
+});
 
 Route::middleware(['auth', 'role:sm'])->get('/sm', fn () =>
     view('dashboard', ['title' => 'Dashboard Store Manager'])
