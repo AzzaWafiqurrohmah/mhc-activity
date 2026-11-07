@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+:root {
+    --brand: #1d4ed8;
+    --brand-dark: #1e3a8a;
+    --brand-soft: #dbeafe;
+    --accent: #f59e0b;
+    --radius: 6px;           /* ubah di sini kalau mau lebih kotak/bulat */
+}
+
+[x-cloak] { display: none !important; }
+
+.bg-brand-gradient { background-image: linear-gradient(135deg, var(--brand-dark), var(--brand)); }
+.text-accent { color: var(--accent); }
+.input-brand:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); outline: none; }
+
+/* Komponen */
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); }
+
+.field { border: 1px solid #cbd5e1; background: #fff; border-radius: var(--radius);
+         padding: .55rem .85rem; font-size: .875rem; }
+.field:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); outline: none; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+       border: 1px solid transparent; border-radius: var(--radius); cursor: pointer;
+       padding: .55rem 1rem; font-size: .875rem; font-weight: 600;
+       transition: background .15s, border-color .15s; }
+.btn-sm { padding: .3rem .7rem; font-size: .75rem; }
+.btn-brand { background: var(--brand); color: #fff; }
+.btn-brand:hover { background: var(--brand-dark); }
+.btn-outline { background: #fff; border-color: #cbd5e1; color: #334155; }
+.btn-outline:hover { background: #f1f5f9; }
+.btn-danger { background: #fff; border-color: #fecaca; color: #dc2626; }
+.btn-danger:hover { background: #fef2f2; }
+.btn-success { background: #fff; border-color: #a7f3d0; color: #047857; }
+.btn-success:hover { background: #ecfdf5; }
+
+.badge { display: inline-block; border-radius: calc(var(--radius) - 2px);
+         padding: .15rem .55rem; font-size: .75rem; font-weight: 500; }
+.badge-green { background: #d1fae5; color: #047857; }
+.badge-gray { background: #e2e8f0; color: #475569; }
+
+/* Navbar gaya natural: teks dengan garis bawah untuk menu aktif */
+.nav-link { display: flex; align-items: center; height: 100%; padding: 0 .1rem;
+            border-bottom: 2px solid transparent; font-size: .875rem; font-weight: 500; color: #64748b; }
+.nav-link:hover { color: #0f172a; }
+.nav-link-active { color: var(--brand); border-bottom-color: var(--brand); }
+
+/* Pagination */
+.pg { display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem;
+      padding: 0 .5rem; border: 1px solid #e2e8f0; border-radius: var(--radius);
+      background: #fff; font-size: .8125rem; color: #475569; }
+a.pg:hover { background: #f1f5f9; }
+.pg-active { background: var(--brand); border-color: var(--brand); color: #fff; }
+.pg-disabled { color: #cbd5e1; }
+
+.badge-blue { background: #dbeafe; color: #1d4ed8; }
+.badge-amber { background: #fef3c7; color: #b45309; }
