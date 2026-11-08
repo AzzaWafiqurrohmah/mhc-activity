@@ -1,13 +1,34 @@
 import Alpine from 'alpinejs';
 
-Alpine.data('liveTable', ({ url, search = '', perPage = 10, filters = {} }) => ({
+Alpine.data('liveTable', ({
+    url, search = '', perPage = 10, filters = {},
+    regions = ['table-area'], refresh = 0,
+}) => ({
     search,
     perPage,
     filters,
+    regions,
+    page: 1,
     loading: false,
     controller: null,
+    timer: null,
+    updated: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
 
-    async load(page = null) {
+    init() {
+        if (refresh > 0) {
+            this.timer = setInterval(() => {
+                if (!document.hidden) this.load(this.page, true);   // refresh diam-diam
+            }, refresh);
+        }
+    },
+
+    destroy() {
+        clearInterval(this.timer);
+    },
+
+    async load(page = null, silent = false) {
+        this.page = page && Number(page) > 1 ? Number(page) : 1;
+
         const params = new URLSearchParams();
         if (this.search.trim() !== '') params.set('q', this.search.trim());
 
@@ -16,27 +37,29 @@ Alpine.data('liveTable', ({ url, search = '', perPage = 10, filters = {} }) => (
         });
 
         if (this.perPage) params.set('per_page', this.perPage);
-        if (page && Number(page) > 1) params.set('page', page);
+        if (this.page > 1) params.set('page', this.page);
 
         const target = url + (params.toString() ? '?' + params : '');
 
         this.controller?.abort();
         this.controller = new AbortController();
-        this.loading = true;
+        if (!silent) this.loading = true;
 
         try {
             const res = await fetch(target, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 signal: this.controller.signal,
             });
-            const html = await res.text();
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const fresh = doc.getElementById('table-area');
+            const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
 
-            if (fresh) {
-                document.getElementById('table-area').innerHTML = fresh.innerHTML;
-                history.replaceState(null, '', target);
+            for (const id of this.regions) {
+                const current = document.getElementById(id);
+                const fresh = doc.getElementById(id);
+                if (current && fresh) current.innerHTML = fresh.innerHTML;
             }
+
+            history.replaceState(null, '', target);
+            this.updated = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         } catch (e) {
             if (e.name !== 'AbortError') console.error(e);
         } finally {
