@@ -53,5 +53,35 @@ Alpine.data('liveTable', ({ url, search = '', perPage = 10, filters = {} }) => (
     },
 }));
 
+Alpine.data('autoRefresh', ({ url, interval = 60000 }) => ({
+    updated: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+    timer: null,
+
+    init() {
+        this.timer = setInterval(() => this.refresh(), interval);
+    },
+
+    destroy() {
+        clearInterval(this.timer);
+    },
+
+    async refresh() {
+        if (document.hidden) return;   // tab tidak sedang dilihat, tidak perlu
+
+        try {
+            const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+            const fresh = doc.getElementById('today-area');
+
+            if (fresh) {
+                document.getElementById('today-area').innerHTML = fresh.innerHTML;
+                this.updated = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    },
+}));
+
 window.Alpine = Alpine;
 Alpine.start();

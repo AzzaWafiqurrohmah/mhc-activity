@@ -9,11 +9,11 @@
 }
 
 :root {
-    --brand: #1d4ed8;
-    --brand-dark: #1e3a8a;
-    --brand-soft: #dbeafe;
-    --accent: #f59e0b;
-    --radius: 6px;           /* ubah di sini kalau mau lebih kotak/bulat */
+    --brand: #946A32;
+    --brand-dark: #6F4E24;
+    --brand-soft: #F1E4C8;
+    --accent: #C9A24D;
+    --radius: 6px;
 }
 
 [x-cloak] { display: none !important; }
@@ -62,5 +62,7 @@ a.pg:hover { background: #f1f5f9; }
 .pg-active { background: var(--brand); border-color: var(--brand); color: #fff; }
 .pg-disabled { color: #cbd5e1; }
 
-.badge-blue { background: #dbeafe; color: #1d4ed8; }
+.badge-blue { background: #ece8e1; color: #57534e; }
 .badge-amber { background: #fef3c7; color: #b45309; }
+.bg-page { background-color: #FAF7F2; }
+.header-accent { border-top: 3px solid var(--accent); }

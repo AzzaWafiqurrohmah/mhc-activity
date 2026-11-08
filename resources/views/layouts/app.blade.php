@@ -19,6 +19,11 @@
             ['Input Harian', 'staff.dashboard', 'staff.dashboard'],
             ['Riwayat',      'staff.history',   'staff.history'],
         ],
+        \App\Role::Sm => [
+            ['Hari Ini',      'sm.dashboard',   'sm.dashboard'],
+            ['Log Aktivitas', 'sm.logs.index',  'sm.logs.*'],
+            ['Rekap Nilai',   'sm.recap.index', 'sm.recap.*'],
+        ],
         default => [],
     };
 @endphp
@@ -30,9 +35,9 @@
     <title>@yield('title') | {{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
+<body class="min-h-screen bg-page text-slate-800 antialiased">
 
-<header class="border-b border-slate-200 bg-white">
+<header class="header-accent border-b border-slate-200 bg-white">
     <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
 
         {{-- Kiri: logo --}}

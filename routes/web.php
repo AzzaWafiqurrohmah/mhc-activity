@@ -3,6 +3,9 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DivisionController;
 use App\Http\Controllers\Staff\DailyLogController;
+use App\Http\Controllers\Sm\LogController;
+use App\Http\Controllers\Sm\TodayController;
+use App\Http\Controllers\Sm\RecapController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\PinController;
@@ -27,9 +30,14 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     Route::put('/log', [DailyLogController::class, 'update'])->name('logs.update');
 });
 
-Route::middleware(['auth', 'role:sm'])->get('/sm', fn () =>
-    view('dashboard', ['title' => 'Dashboard Store Manager'])
-)->name('sm.dashboard');
+
+Route::middleware(['auth', 'role:sm'])->prefix('sm')->name('sm.')->group(function () {
+    // sementara placeholder, nanti diganti controller sendiri
+    Route::get('/', [TodayController::class, 'index'])->name('dashboard');
+    Route::get('recap', [RecapController::class, 'index'])->name('recap.index');
+    Route::get('recap/{user}', [RecapController::class, 'show'])->name('recap.show');
+    Route::get('logs', [LogController::class, 'index'])->name('logs.index');
+});
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', fn () => redirect()->route('admin.divisions.index'))->name('dashboard');

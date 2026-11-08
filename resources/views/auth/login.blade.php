@@ -6,7 +6,7 @@
     <title>Masuk | {{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
+<body class="min-h-screen bg-page text-slate-800 antialiased">
 <div class="grid min-h-screen lg:grid-cols-2">
 
     {{-- Panel kiri: identitas --}}
