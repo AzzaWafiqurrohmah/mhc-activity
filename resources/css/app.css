@@ -23,8 +23,10 @@
 .input-brand:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); outline: none; }
 
 /* Komponen */
-.card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); }
+.bg-page { background-color: #F4E9D3; }
 
+.card { background: #fff; border: 1px solid #E6D3AC; border-radius: var(--radius);
+        box-shadow: 0 1px 3px rgba(120, 90, 40, .08); }
 .field { border: 1px solid #cbd5e1; background: #fff; border-radius: var(--radius);
          padding: .55rem .85rem; font-size: .875rem; }
 .field:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); outline: none; }
@@ -44,7 +46,7 @@
 .btn-success:hover { background: #ecfdf5; }
 
 .badge { display: inline-block; border-radius: calc(var(--radius) - 2px);
-         padding: .15rem .55rem; font-size: .75rem; font-weight: 500; }
+         padding: .2rem .65rem; font-size: .8125rem; font-weight: 600; }
 .badge-green { background: #d1fae5; color: #047857; }
 .badge-gray { background: #e2e8f0; color: #475569; }
 
