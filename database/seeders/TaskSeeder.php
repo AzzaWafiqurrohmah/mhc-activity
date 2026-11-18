@@ -37,6 +37,14 @@ class TaskSeeder extends Seeder
                 ['Bersihkan area',    TaskType::Routine],
                 ['Ganti promo',       TaskType::Incidental],
             ],
+            'CS' => [
+                ['Buat dokumen pengiriman (DO)', TaskType::Routine],
+                ['Handle sales online (WA)',     TaskType::Routine],
+                ['Proses member',                TaskType::Routine],
+                ['Komplain / retur',             TaskType::Incidental],
+                ['Klaim garansi',                TaskType::Incidental],
+                ['Hadiah pembelanjaan',          TaskType::Incidental],
+            ],
         ];
 
         foreach ($data as $divisionName => $tasks) {

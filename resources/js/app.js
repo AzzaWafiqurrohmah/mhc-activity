@@ -13,6 +13,7 @@ Alpine.data('liveTable', ({
     controller: null,
     timer: null,
     updated: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+    exporting: false,
 
     init() {
         if (refresh > 0) {
@@ -67,6 +68,82 @@ Alpine.data('liveTable', ({
         }
     },
 
+    exportUrl(base) {
+        const params = new URLSearchParams();
+        if (this.search.trim() !== '') params.set('q', this.search.trim());
+
+        Object.entries(this.filters).forEach(([key, value]) => {
+            if (value !== '' && value !== null) params.set(key, value);
+        });
+
+        return base + (params.toString() ? '?' + params : '');
+    },
+
+    async exportFile(base) {
+        if (this.exporting) return;
+
+        const total = Number(document.querySelector('[data-total]')?.dataset.total ?? 0);
+
+        if (total === 0) {
+            window.toast({
+                type: 'warning',
+                title: 'Tidak ada data',
+                message: 'Tidak ada baris yang cocok dengan pencarian atau filter ini, jadi tidak ada yang diekspor.',
+            });
+            return;
+        }
+
+        this.exporting = true;
+
+        const id = window.toast({
+            type: 'loading',
+            title: 'Menyiapkan ekspor...',
+            message: `${total.toLocaleString('id-ID')} data sedang dikemas ke Excel.`,
+            timeout: 0,
+        });
+
+        try {
+            const res = await fetch(this.exportUrl(base), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            // sesi habis: server mengalihkan ke halaman login, bukan mengirim file
+            if (!res.ok || res.redirected || (res.headers.get('Content-Type') ?? '').includes('text/html')) {
+                throw new Error('Respons bukan file Excel');
+            }
+
+            const count = Number(res.headers.get('X-Export-Count') ?? total);
+            const disposition = res.headers.get('Content-Disposition') ?? '';
+            const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+            const filename = match ? decodeURIComponent(match[1]) : 'member.xlsx';
+
+            const blob = await res.blob();
+            const href = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = href;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(href), 10000);
+
+            window.toastUpdate(id, {
+                type: 'success',
+                title: 'Ekspor berhasil',
+                message: `${count.toLocaleString('id-ID')} data tersimpan di ${filename}.`,
+            });
+        } catch (e) {
+            console.error(e);
+            window.toastUpdate(id, {
+                type: 'error',
+                title: 'Ekspor gagal',
+                message: 'Terjadi masalah saat membuat file. Muat ulang halaman lalu coba lagi.',
+            });
+        } finally {
+            this.exporting = false;
+        }
+    },
+
     onPageClick(event) {
         const link = event.target.closest('a.pg');
         if (!link) return;
@@ -105,6 +182,36 @@ Alpine.data('autoRefresh', ({ url, interval = 60000 }) => ({
         }
     },
 }));
+
+Alpine.store('toasts', {
+    items: [],
+
+    push({ type = 'success', title = '', message = '', timeout = 6000 }) {
+        const id = Date.now() + Math.random();
+        this.items.push({ id, type, title, message });
+        if (timeout > 0) setTimeout(() => this.remove(id), timeout);
+        return id;
+    },
+
+    update(id, patch, timeout = 6000) {
+        const item = this.items.find((t) => t.id === id);
+
+        if (!item) {
+            this.push({ ...patch, timeout });
+            return;
+        }
+
+        Object.assign(item, patch);
+        if (timeout > 0) setTimeout(() => this.remove(id), timeout);
+    },
+
+    remove(id) {
+        this.items = this.items.filter((t) => t.id !== id);
+    },
+});
+
+window.toast = (options) => Alpine.store('toasts').push(options);
+window.toastUpdate = (id, patch, timeout) => Alpine.store('toasts').update(id, patch, timeout);
 
 window.Alpine = Alpine;
 Alpine.start();

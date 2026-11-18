@@ -34,9 +34,10 @@ class UserSeeder extends Seeder
 
         // Staff dummy per divisi
         $staff = [
-            'Kasir'  => ['Rina', 'Dewi', 'Sari', 'Putri'],
-            'Gudang' => ['Budi', 'Andi', 'Joko', 'Eko'],
-            'Display'=> ['Maya', 'Lina', 'Tono'],
+            'Kasir'   => ['Rina', 'Dewi', 'Sari', 'Putri'],
+            'Gudang'  => ['Budi', 'Andi', 'Joko', 'Eko'],
+            'Display' => ['Maya', 'Lina', 'Tono'],
+            'CS'      => ['Nadia', 'Fitri', 'Wulan'],
         ];
 
         $n = 1;

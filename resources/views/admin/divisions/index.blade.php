@@ -9,17 +9,23 @@
         mode: @js(old('_mode', 'create')),
         action: @js(old('_action', route('admin.divisions.store'))),
         name: @js(old('name', '')),
+        code: @js(old('code', '')),
+        codeLocked: false,
         create() {
             this.mode = 'create';
             this.action = @js(route('admin.divisions.store'));
             this.name = '';
+            this.code = '';
+            this.codeLocked = false;
             this.open = true;
             this.$nextTick(() => this.$refs.name.focus());
         },
-        edit(url, name) {
+        edit(url, name, code) {
             this.mode = 'edit';
             this.action = url;
             this.name = name;
+            this.code = code ?? '';
+            this.codeLocked = !!code;
             this.open = true;
             this.$nextTick(() => this.$refs.name.focus());
         },
@@ -64,6 +70,7 @@
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="px-5 py-3">Nama</th>
+                        <th class="px-5 py-3">Kode</th>
                         <th class="px-5 py-3">Staff aktif</th>
                         <th class="px-5 py-3">Tugas aktif</th>
                         <th class="px-5 py-3">Status</th>
@@ -74,6 +81,7 @@
                     @forelse ($divisions as $division)
                         <tr class="{{ $division->is_active ? '' : 'bg-slate-50 text-slate-400' }}">
                             <td class="px-5 py-3 font-medium">{{ $division->name }}</td>
+                            <td class="px-5 py-3 font-mono text-[13px] text-slate-600">{{ $division->code ?? '-' }}</td>
                             <td class="px-5 py-3">{{ $division->users_count }}</td>
                             <td class="px-5 py-3">{{ $division->tasks_count }}</td>
                             <td class="px-5 py-3">
@@ -84,7 +92,7 @@
                             <td class="px-5 py-3">
                                 <div class="flex items-center justify-end gap-2">
                                     <button type="button" class="btn btn-outline btn-sm"
-                                            @click="edit(@js(route('admin.divisions.update', $division)), @js($division->name))">
+                                            @click="edit(@js(route('admin.divisions.update', $division)), @js($division->name), @js($division->code))">
                                         Edit
                                     </button>
 
@@ -162,6 +170,23 @@
                         <input id="name" type="text" name="name" x-model="name" x-ref="name"
                                class="field w-full" placeholder="Contoh: Kasir">
                         @error('name')
+                            <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="division-code" class="mb-1.5 block text-sm font-medium">Kode divisi</label>
+                        <input id="division-code" type="text" name="code" x-model="code" :disabled="codeLocked"
+                            class="field w-full lowercase disabled:bg-slate-50 disabled:text-slate-500"
+                            placeholder="Contoh: cs">
+
+                        <p class="mt-1.5 text-xs text-slate-500" x-show="codeLocked">
+                            Kode tidak bisa diubah karena dipakai untuk menu divisi.
+                        </p>
+                        <p class="mt-1.5 text-xs text-slate-500" x-show="!codeLocked" x-cloak>
+                            Huruf kecil, angka, atau garis bawah. Tidak bisa diubah setelah disimpan.
+                        </p>
+
+                        @error('code')
                             <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>
                         @enderror
                     </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Division;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class DivisionController extends Controller
 {
@@ -36,28 +37,41 @@ class DivisionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:100', 'unique:divisions,name'],
-        ], [], ['name' => 'Nama divisi']);
+   public function store(Request $request)
+{
+    $request->merge(['code' => Str::lower(trim((string) $request->input('code')))]);
 
-        Division::create($data);
+    $data = $request->validate([
+        'name' => ['required', 'string', 'max:100', 'unique:divisions,name'],
+        'code' => ['required', 'string', 'max:30', 'regex:/^[a-z0-9_]+$/', 'unique:divisions,code'],
+    ], [], ['name' => 'Nama divisi', 'code' => 'Kode divisi']);
 
-        return back()->with('success', 'Divisi berhasil ditambahkan.');
+    Division::create($data);
+
+    return back()->with('success', 'Divisi berhasil ditambahkan.');
+}
+
+public function update(Request $request, Division $division)
+{
+    $rules = [
+        'name' => ['required', 'string', 'max:100',
+                   Rule::unique('divisions', 'name')->ignore($division->id)],
+    ];
+
+    // kode hanya boleh diisi kalau masih kosong; kalau sudah ada, dikunci
+    if ($division->code === null) {
+        $request->merge(['code' => Str::lower(trim((string) $request->input('code')))]);
+
+        $rules['code'] = ['required', 'string', 'max:30', 'regex:/^[a-z0-9_]+$/',
+                          Rule::unique('divisions', 'code')->ignore($division->id)];
     }
 
-    public function update(Request $request, Division $division)
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:100',
-                       Rule::unique('divisions', 'name')->ignore($division->id)],
-        ], [], ['name' => 'Nama divisi']);
+    $data = $request->validate($rules, [], ['name' => 'Nama divisi', 'code' => 'Kode divisi']);
 
-        $division->update($data);
+    $division->update($data);
 
-        return back()->with('success', 'Divisi berhasil diperbarui.');
-    }
+    return back()->with('success', 'Divisi berhasil diperbarui.');
+}
 
     public function toggle(Division $division)
     {

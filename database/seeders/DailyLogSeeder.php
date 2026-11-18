@@ -20,6 +20,9 @@ class DailyLogSeeder extends Seeder
         $staff = User::where('role', Role::Staff)->with('division.tasks')->get();
 
     foreach ($staff as $user) {
+        if (DailyLog::where('user_id', $user->id)->exists()) {
+            continue;   // sudah punya log, jangan dobel
+        }
         $tasks = $user->division->tasks;
 
         // 30 hari terakhir, tidak termasuk hari ini

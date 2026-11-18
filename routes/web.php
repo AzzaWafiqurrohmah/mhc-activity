@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\PinController;
 use Illuminate\Support\Facades\Route;
+    use App\Http\Controllers\Staff\Cs\MemberController;
+
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -28,6 +30,26 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     Route::get('/riwayat', [DailyLogController::class, 'history'])->name('history');
     Route::post('/log', [DailyLogController::class, 'store'])->name('logs.store');
     Route::put('/log', [DailyLogController::class, 'update'])->name('logs.update');
+});
+
+Route::middleware(['auth', 'role:staff'])->prefix('staff/cs')->name('staff.cs.')->group(function () {
+
+    $placeholder = fn (string $module) => fn () => view('staff.module-placeholder', [
+        'title' => config("modules.{$module}.label"),
+    ]);
+
+    Route::get('do',     $placeholder('cs_do'))->middleware('module:cs_do')->name('do.index');
+    Route::get('wa',     $placeholder('cs_wa'))->middleware('module:cs_wa')->name('wa.index');
+    Route::middleware('module:cs_member')->group(function () {
+        Route::get('member', [MemberController::class, 'index'])->name('member.index');
+        Route::post('member', [MemberController::class, 'store'])->name('member.store');
+        Route::put('member/{member}', [MemberController::class, 'update'])->name('member.update');
+        Route::get('member/export', [MemberController::class, 'export'])->name('member.export');
+        Route::get('member/template', [MemberController::class, 'template'])->name('member.template');
+        Route::post('member/import', [MemberController::class, 'import'])->name('member.import');
+    });
+    Route::get('claim',  $placeholder('cs_claim'))->middleware('module:cs_claim')->name('claim.index');
+    Route::get('reward', $placeholder('cs_reward'))->middleware('module:cs_reward')->name('reward.index');
 });
 
 

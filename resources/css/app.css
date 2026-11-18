@@ -68,3 +68,15 @@ a.pg:hover { background: #f1f5f9; }
 .badge-amber { background: #fef3c7; color: #b45309; }
 .bg-page { background-color: #FAF7F2; }
 .header-accent { border-top: 3px solid var(--accent); }
+
+.btn-gold { background: #F0D9A8; border-color: #E2C47F; color: #6B4F2E; }
+.btn-gold:hover { background: #EBCB8A; }
+
+.btn-green { background: #059669; border-color: #047857; color: #fff; }
+.btn-green:hover { background: #047857; }
+
+@keyframes toast-in { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+.toast-in { animation: toast-in .25s ease-out; }
+
+@keyframes toast-bar { from { width: 100%; } to { width: 0; } }
+.toast-bar { animation: toast-bar 6s linear forwards; }

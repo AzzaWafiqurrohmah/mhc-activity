@@ -1,5 +1,6 @@
 @php
     $user = auth()->user();
+    $modules = \App\Support\Modules::forUser($user);
 
     // inisial untuk avatar: huruf pertama dari dua kata pertama nama
     $initials = \Illuminate\Support\Str::of($user->name)
@@ -16,8 +17,8 @@
             ['Tugas',  'admin.tasks.index',     'admin.tasks.*'],
         ],
         \App\Role::Staff => [
-            ['Input Harian', 'staff.dashboard', 'staff.dashboard'],
-            ['Riwayat',      'staff.history',   'staff.history'],
+            ['Aktivitas Harian', 'staff.dashboard', 'staff.dashboard'],
+            ['Riwayat',     'staff.history',   'staff.history'],
         ],
         \App\Role::Sm => [
             ['Hari Ini',      'sm.dashboard',   'sm.dashboard'],
@@ -27,6 +28,8 @@
         default => [],
     };
 @endphp
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -60,6 +63,39 @@
                         </a>
                     @endif
                 @endforeach
+                @if (count($modules))
+                    @php
+                        $reportActive = collect($modules)->contains(fn ($m) => request()->routeIs($m['pattern']));
+                    @endphp
+
+                    <div class="relative flex h-full items-stretch"
+                        x-data="{ open: false }"
+                        @click.outside="open = false"
+                        @keydown.escape.window="open = false">
+
+                        <button type="button" @click="open = !open"
+                                class="nav-link gap-1 {{ $reportActive ? 'nav-link-active' : '' }}">
+                            Report
+                            <svg class="h-4 w-4 transition" :class="open ? 'rotate-180' : ''" viewBox="0 0 20 20"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 8l5 5 5-5"/>
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-cloak x-transition.origin.top
+                            class="absolute left-0 top-full z-40 mt-1 w-64 rounded-lg border border-slate-200 bg-white py-1.5 shadow-lg">
+                            @foreach ($modules as $m)
+                                <a href="{{ route($m['route']) }}"
+                                class="block px-4 py-2.5 text-sm font-medium
+                                        {{ request()->routeIs($m['pattern'])
+                                                ? 'bg-[var(--brand-soft)] text-[var(--brand-dark)]'
+                                                : 'text-slate-700 hover:bg-slate-50' }}">
+                                    {{ $m['label'] }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </nav>
 
             {{-- User: nama + avatar inisial, klik untuk buka menu --}}
@@ -113,17 +149,12 @@
 
 <main class="mx-auto max-w-6xl px-6 py-8">
     @if (session('success'))
-        <div class="mb-6 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {{ session('success') }}
-        </div>
-    @endif
+    <div x-data x-init="window.toast({ type: 'success', title: 'Berhasil', message: @js(session('success')) })"></div>
+@endif
 
-    {{-- hanya untuk pesan umum (key "alert"); error validasi tampil di dalam modal --}}
-    @error('alert')
-        <div class="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {{ $message }}
-        </div>
-    @enderror
+@error('alert')
+    <div x-data x-init="window.toast({ type: 'error', title: 'Tidak bisa diproses', message: @js($message) })"></div>
+@enderror
 
     @yield('content')
 </main>
@@ -206,6 +237,62 @@
             </div>
         </form>
     </div>
+</div>
+
+<div x-data class="pointer-events-none fixed right-4 top-4 z-[60] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-3">
+    <template x-for="t in $store.toasts.items" :key="t.id">
+        <div class="toast-in pointer-events-auto relative overflow-hidden rounded-lg border bg-white shadow-lg"
+             :class="{
+                'border-emerald-300': t.type === 'success',
+                'border-amber-300':   t.type === 'warning',
+                'border-red-300':     t.type === 'error',
+                'border-[#E2C47F]':   t.type === 'loading'
+             }">
+
+            <div class="flex items-start gap-3 p-4">
+                <span class="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                      :class="{
+                        'bg-emerald-100 text-emerald-600': t.type === 'success',
+                        'bg-amber-100 text-amber-600':     t.type === 'warning',
+                        'bg-red-100 text-red-600':         t.type === 'error',
+                        'bg-[#F0D9A8] text-[#946A32]':     t.type === 'loading'
+                      }">
+                    <svg x-show="t.type === 'success'" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12.5l4.5 4.5L19 7.5"/>
+                    </svg>
+                    <svg x-show="t.type === 'warning'" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 8v5M12 16.5h.01"/><path d="M10.3 4.2L2.8 17a2 2 0 001.7 3h15a2 2 0 001.7-3L13.7 4.2a2 2 0 00-3.4 0z"/>
+                    </svg>
+                    <svg x-show="t.type === 'error'" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 6l12 12M18 6L6 18"/>
+                    </svg>
+                    <svg x-show="t.type === 'loading'" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                        <path d="M12 3a9 9 0 019 9" />
+                    </svg>
+                </span>
+
+                <div class="min-w-0 flex-1">
+                    <p class="text-[15px] font-semibold text-[#3B2E1A]" x-text="t.title"></p>
+                    <p class="mt-0.5 text-sm text-slate-600" x-text="t.message"></p>
+                </div>
+
+                <button type="button" @click="$store.toasts.remove(t.id)"
+                        class="text-xl leading-none text-slate-400 hover:text-slate-600" aria-label="Tutup">&times;</button>
+            </div>
+
+            {{-- garis hitung mundur --}}
+            <div x-show="t.type !== 'loading'" class="toast-bar h-1"
+                 :class="{
+                    'bg-emerald-400': t.type === 'success',
+                    'bg-amber-400':   t.type === 'warning',
+                    'bg-red-400':     t.type === 'error'
+                 }"></div>
+        </div>
+    </template>
 </div>
 
 </body>

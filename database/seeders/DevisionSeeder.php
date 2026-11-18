@@ -13,8 +13,15 @@ class DevisionSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (['Kasir', 'Gudang', 'Display'] as $name) {
-            Division::firstOrCreate(['name' => $name]);
+        $divisions = [
+            'Kasir'   => 'kasir',
+            'Gudang'  => 'gudang',
+            'Display' => 'display',
+            'CS'      => 'cs',
+        ];
+
+        foreach ($divisions as $name => $code) {
+            Division::updateOrCreate(['name' => $name], ['code' => $code]);
         }
     }
 }
