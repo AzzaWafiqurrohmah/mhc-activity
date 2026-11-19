@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             TaskSeeder::class,
             UserSeeder::class,
             DailyLogSeeder::class,
-            MemberSeeder::class
+            MemberSeeder::class,
+            RewardSeeder::class,
         ]);
     }
 }

@@ -66,6 +66,7 @@ a.pg:hover { background: #f1f5f9; }
 
 .badge-blue { background: #ece8e1; color: #57534e; }
 .badge-amber { background: #fef3c7; color: #b45309; }
+.badge-red { background: #fee2e2; color: #b91c1c; }
 .bg-page { background-color: #FAF7F2; }
 .header-accent { border-top: 3px solid var(--accent); }
 
