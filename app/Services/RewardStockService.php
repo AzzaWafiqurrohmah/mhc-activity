@@ -4,6 +4,7 @@
 namespace App\Services;
 
 use App\Models\Member;
+use App\StockStatus;
 use App\Models\Reward;
 use App\Models\RewardStockIn;
 use App\Models\RewardStockOut;
@@ -14,11 +15,12 @@ use Illuminate\Validation\ValidationException;
 class RewardStockService
 {
     /** Opening stock is logged as the first stock-in, so stock always equals ins minus outs. */
-    public function create(string $brand, string $type, int $openingStock, User $by): Reward
+    public function create(string $brand, string $type, int $openingStock, User $by, int $minStock = StockStatus::DEFAULT_MIN): Reward
     {
-        return DB::transaction(function () use ($brand, $type, $openingStock, $by) {
+        return DB::transaction(function () use ($brand, $type, $openingStock, $by, $minStock) {
             $reward = Reward::create([
-                'brand' => $brand, 'type' => $type, 'stock' => 0, 'created_by' => $by->id,
+                'brand' => $brand, 'type' => $type, 'stock' => 0,
+                'min_stock' => $minStock, 'created_by' => $by->id,
             ]);
 
             if ($openingStock > 0) {

@@ -8,14 +8,14 @@ enum StockStatus: string
     case Low  = 'low';
     case Out  = 'out';
 
-    public const LOW_THRESHOLD = 5;
+    public const DEFAULT_MIN = 5;
 
-    public static function forStock(int $stock): self
+    public static function forStock(int $stock, int $min): self
     {
         return match (true) {
-            $stock <= 0                  => self::Out,
-            $stock <= self::LOW_THRESHOLD => self::Low,
-            default                      => self::Safe,
+            $stock <= 0    => self::Out,
+            $stock <= $min => self::Low,
+            default        => self::Safe,
         };
     }
 

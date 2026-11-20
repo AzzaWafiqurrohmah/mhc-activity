@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('brand', 100);
             $table->string('type', 100);
             $table->unsignedInteger('stock')->default(0);
+            $table->unsignedInteger('min_stock')->default(5);
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

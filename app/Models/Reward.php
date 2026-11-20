@@ -10,12 +10,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Reward extends Model
 {
-    protected $fillable = ['brand', 'type', 'stock', 'created_by', 'updated_by'];
+    protected $fillable = ['brand', 'type', 'stock', 'min_stock', 'created_by', 'updated_by'];
+
+    public function status(): StockStatus
+    {
+        return StockStatus::forStock($this->stock, $this->min_stock);
+    }
+
+    public function scopeNeedsRestock(Builder $query): void
+    {
+        $query->whereColumn('stock', '<=', 'min_stock')->orWhere('stock', '<=', 0);
+    }
 
     public function stockIns(): HasMany  { return $this->hasMany(RewardStockIn::class); }
     public function stockOuts(): HasMany { return $this->hasMany(RewardStockOut::class); }
-
-    public function status(): StockStatus { return StockStatus::forStock($this->stock); }
 
     public function label(): string { return "{$this->brand} {$this->type}"; }
 
@@ -26,11 +34,6 @@ class Reward extends Model
             $like = '%' . addcslashes($word, '%_\\') . '%';
             $query->where(fn ($q) => $q->where('brand', 'like', $like)->orWhere('type', 'like', $like));
         }
-    }
-
-    public function scopeNeedsRestock(Builder $query): void
-    {
-        $query->where('stock', '<=', StockStatus::LOW_THRESHOLD);
     }
 
     public function scopeMatching(Builder $query, string $brand = '', string $type = ''): void

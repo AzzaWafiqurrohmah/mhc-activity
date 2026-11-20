@@ -2,6 +2,7 @@
 
 // app/Http/Controllers/Staff/Cs/RewardController.php
 namespace App\Http\Controllers\Staff\Cs;
+use App\Http\Controllers\Concerns\CleansFilters;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reward;
@@ -14,19 +15,23 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class RewardController extends Controller
 {
+    use CleansFilters;
     public function __construct(private RewardStockService $stock) {}
 
     public function index(Request $request)
     {
-        $search = trim((string) $request->query('q'));
+        $search  = trim((string) $request->query('q'));
+        $perPage = $this->resolvePerPage($request);
 
         return view('staff.cs.reward.index', [
-            'rewards' => $this->query($search)->get(),
-            'search'  => $search,
-            'today'   => today()->toDateString(),
-            'brands'  => Reward::distinct()->orderBy('brand')->pluck('brand'),
-            'summary' => [
-            'kinds'   => Reward::count(),
+            'rewards'        => $this->query($search)->paginate($perPage)->withQueryString(),
+            'search'         => $search,
+            'perPage'        => $perPage,
+            'perPageOptions' => $this->perPageOptions(),
+            'today'          => today()->toDateString(),
+            'brands'         => Reward::distinct()->orderBy('brand')->pluck('brand'),
+            'summary'        => [
+                'kinds'   => Reward::count(),
                 'stock'   => (int) Reward::sum('stock'),
                 'restock' => Reward::needsRestock()->count(),
             ],
@@ -60,10 +65,13 @@ class RewardController extends Controller
             'type'          => ['required', 'string', 'max:100',
                                 Rule::unique('rewards', 'type')->where('brand', $request->input('brand'))],
             'opening_stock' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'min_stock'     => ['required', 'integer', 'min:0', 'max:1000000'],
         ], ['type.unique' => 'Hadiah dengan brand dan jenis ini sudah ada.'], $this->labels());
 
-        $this->stock->create($data['brand'], $data['type'], (int) ($data['opening_stock'] ?? 0), $request->user());
-
+        $this->stock->create(
+            $data['brand'], $data['type'], (int) ($data['opening_stock'] ?? 0),
+            $request->user(), (int) $data['min_stock'],
+        );
         return back()->with('success', 'Hadiah baru berhasil ditambahkan.');
     }
 
@@ -72,6 +80,7 @@ class RewardController extends Controller
     {
         $data = $request->validate([
             'brand' => ['required', 'string', 'max:100'],
+            'min_stock' => ['required', 'integer', 'min:0', 'max:1000000'],
             'type'  => ['required', 'string', 'max:100',
                         Rule::unique('rewards', 'type')->where('brand', $request->input('brand'))->ignore($reward->id)],
         ], ['type.unique' => 'Hadiah dengan brand dan jenis ini sudah ada.'], $this->labels());
@@ -83,6 +92,6 @@ class RewardController extends Controller
 
     private function labels(): array
     {
-        return ['brand' => 'Brand', 'type' => 'Jenis', 'opening_stock' => 'Stok awal'];
+        return ['brand' => 'Brand', 'type' => 'Jenis', 'opening_stock' => 'Stok awal', 'min_stock' => 'Stok minimum'];
     }
 }

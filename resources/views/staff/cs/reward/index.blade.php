@@ -13,12 +13,14 @@
         modal: @js($m),
         editAction: @js($m === 'edit' ? old('_action', '') : ''),
         label: @js($m === 'restock' ? old('_label', '') : ''),
-        createForm:  { brand: @js($pick('create', 'brand')), type: @js($pick('create', 'type')), opening_stock: @js($pick('create', 'opening_stock')) },
-        editForm:    { brand: @js($pick('edit', 'brand')), type: @js($pick('edit', 'type')) },
+        createForm:  { brand: @js($pick('create', 'brand')), type: @js($pick('create', 'type')),
+                    opening_stock: @js($pick('create', 'opening_stock')), min_stock: @js($pick('create', 'min_stock', '5')) },
+        editForm:    { brand: @js($pick('edit', 'brand')), type: @js($pick('edit', 'type')),
+                    min_stock: @js($pick('edit', 'min_stock')) },
         restockForm: { reward_id: @js($pick('restock', 'reward_id')), received_on: @js($pick('restock', 'received_on', $today)),
                        quantity: @js($pick('restock', 'quantity')), notes: @js($pick('restock', 'notes')) },
         openCreate() {
-            this.createForm = { brand: '', type: '', opening_stock: '' };
+            this.createForm = { brand: '', type: '', opening_stock: '', min_stock: '5' };
             this.modal = 'create';
             this.$nextTick(() => this.$refs.createFirst.focus());
         },
@@ -68,7 +70,7 @@
     <div x-data="liveTable({
             url: @js(route('staff.cs.reward.index')),
             search: @js($search),
-            perPage: 0,
+            perPage: @js($perPage),
             filters: {},
             regions: ['reward-list'],
          })">
@@ -98,38 +100,54 @@
     </div>
 
         <div class="card overflow-hidden">
-            <div id="reward-list" :class="loading ? 'opacity-60' : ''" class="transition-opacity">
+<div id="reward-list" :class="loading ? 'opacity-60' : ''" class="transition-opacity">
 
-                <div class="hidden gap-4 border-b border-[#E2C47F] bg-[#F7ECD0] px-5 py-3 text-[13px] font-semibold
-                            text-[#6B4F2E] lg:grid lg:grid-cols-[1.5fr_1.5fr_1fr_1fr_14rem]">
-                    <span>Brand</span><span>Jenis</span><span>Stok</span><span>Status</span><span></span>
-                </div>
+    <div class="hidden gap-4 border-b border-[#E2C47F] bg-[#F7ECD0] px-5 py-3 text-[13px] font-semibold
+                text-[#6B4F2E] lg:grid lg:grid-cols-[1.4fr_1.4fr_0.8fr_0.8fr_1fr_14rem]">
+        <span>Brand</span><span>Jenis</span><span>Stok</span><span>Minimum</span><span>Status</span><span></span>
+    </div>
 
-                <div class="divide-y divide-[#EFE2C2]">
-                    @forelse ($rewards as $reward)
-                        <div class="grid items-center gap-x-4 gap-y-2 px-5 py-4 transition hover:bg-[#FFF8E6]
-                                    lg:grid-cols-[1.5fr_1.5fr_1fr_1fr_14rem]">
-                            <p class="text-[15px] font-semibold text-[#3B2E1A]">{{ $reward->brand }}</p>
-                            <p class="text-[15px] text-slate-800">{{ $reward->type }}</p>
-                            <p class="text-2xl font-extrabold text-[#3B2E1A]">{{ number_format($reward->stock, 0, ',', '.') }}</p>
-                            <div><span class="badge {{ $reward->status()->badge() }}">{{ $reward->status()->label() }}</span></div>
-                            <div class="flex gap-2 lg:justify-end">
-                                <button type="button" class="btn btn-gold btn-sm"
-                                        @click="openRestock(@js($reward->id), @js($reward->label()))">Tambah Stok</button>
-                                <button type="button" class="btn btn-outline btn-sm"
-                                        @click="openEdit(@js(route('staff.cs.reward.update', $reward)), @js(['brand' => $reward->brand, 'type' => $reward->type]))">Edit</button>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="px-5 py-14 text-center text-base text-slate-500">
-                            Belum ada hadiah yang cocok. Klik "+ Hadiah Baru" untuk menambahkan.
-                        </div>
-                    @endforelse
-                </div>
-                <div class="border-t border-[#EFE2C2] bg-[#FBF3E0] px-5 py-3 text-sm text-[#6B4F2E]">
-                    <p data-total="{{ $rewards->count() }}" class="font-medium">Menampilkan {{ $rewards->count() }} jenis hadiah</p>
+    <div class="divide-y divide-[#EFE2C2]">
+        @forelse ($rewards as $reward)
+            <div class="grid items-center gap-x-4 gap-y-2 px-5 py-4 transition hover:bg-[#FFF8E6]
+                        lg:grid-cols-[1.4fr_1.4fr_0.8fr_0.8fr_1fr_14rem]">
+                <p class="text-[15px] font-semibold text-[#3B2E1A]">{{ $reward->brand }}</p>
+                <p class="text-[15px] text-slate-800">{{ $reward->type }}</p>
+                <p class="text-2xl font-extrabold text-[#3B2E1A]">{{ number_format($reward->stock, 0, ',', '.') }}</p>
+                <p class="text-[15px] text-slate-500">{{ number_format($reward->min_stock, 0, ',', '.') }}</p>
+                <div><span class="badge {{ $reward->status()->badge() }}">{{ $reward->status()->label() }}</span></div>
+                <div class="flex gap-2 lg:justify-end">
+                    <button type="button" class="btn btn-gold btn-sm"
+                            @click="openRestock(@js($reward->id), @js($reward->label()))">Tambah Stok</button>
+                    <button type="button" class="btn btn-outline btn-sm"
+                            @click="openEdit(@js(route('staff.cs.reward.update', $reward)), @js(['brand' => $reward->brand, 'type' => $reward->type, 'min_stock' => $reward->min_stock]))">Edit</button>
                 </div>
             </div>
+        @empty
+            <div class="px-5 py-14 text-center text-base text-slate-500">
+                Belum ada hadiah yang cocok. Klik "+ Hadiah Baru" untuk menambahkan.
+            </div>
+        @endforelse
+    </div>
+
+    <div class="flex flex-col gap-3 border-t border-[#EFE2C2] bg-[#FBF3E0] px-5 py-3 text-sm text-[#6B4F2E]
+                sm:flex-row sm:items-center sm:justify-between">
+        <p data-total="{{ $rewards->total() }}" class="font-medium">Menampilkan {{ $rewards->count() }} dari {{ $rewards->total() }} data</p>
+        <div class="flex flex-wrap items-center gap-4">
+            <label class="flex items-center gap-2 font-medium">
+                Tampilkan
+                <select x-model="perPage" @change="load()" class="field py-1.5">
+                    @foreach ($perPageOptions as $n)
+                        <option value="{{ $n }}" @selected($perPage === $n)>{{ $n }}</option>
+                    @endforeach
+                </select>
+            </label>
+            {{ $rewards->links('pagination.compact') }}
+        </div>
+    </div>
+
+    <div id="reward-list" @click="onPageClick($event)" :class="loading ? 'opacity-60' : ''" class="transition-opacity">
+</div>
         </div>
     </div>
 
@@ -161,12 +179,20 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="mb-1.5 block text-sm font-semibold text-[#6B4F2E]">Stok awal</label>
-                    <input type="number" name="opening_stock" x-model="createForm.opening_stock" min="0" step="1"
-                           class="field w-full" placeholder="0">
-                    <p class="mt-1 text-xs text-slate-500">Opsional. Dicatat otomatis sebagai stok masuk pertama.</p>
-                    @if ($m === 'create') <p class="mt-1 text-xs text-red-600">{{ $errors->first('opening_stock') }}</p> @endif
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-semibold text-[#6B4F2E]">Stok awal</label>
+                        <input type="number" name="opening_stock" x-model="createForm.opening_stock" min="0" step="1"
+                            class="field w-full" placeholder="0">
+                        <p class="mt-1 text-xs text-slate-500">Opsional. Dicatat sebagai stok masuk pertama.</p>
+                        @if ($m === 'create') <p class="mt-1 text-xs text-red-600">{{ $errors->first('opening_stock') }}</p> @endif
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-semibold text-[#6B4F2E]">Stok minimum</label>
+                        <input type="number" name="min_stock" x-model="createForm.min_stock" min="0" step="1" class="field w-full">
+                        <p class="mt-1 text-xs text-slate-500">Menipis kalau stok sama dengan atau di bawah angka ini.</p>
+                        @if ($m === 'create') <p class="mt-1 text-xs text-red-600">{{ $errors->first('min_stock') }}</p> @endif
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-2">
@@ -201,6 +227,15 @@
                         <input type="text" name="type" x-model="editForm.type" class="field w-full" autocomplete="off">
                         @if ($m === 'edit') <p class="mt-1 text-xs text-red-600">{{ $errors->first('type') }}</p> @endif
                     </div>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-sm font-semibold text-[#6B4F2E]">Stok minimum</label>
+                    <input type="number" name="min_stock" x-model="editForm.min_stock" min="0" step="1" class="field w-full">
+                    <p class="mt-1 text-xs text-slate-500">
+                        Status "Menipis" muncul kalau stok sama dengan atau di bawah angka ini. Status "Habis" kalau stok 0.
+                    </p>
+                    @if ($m === 'edit') <p class="mt-1 text-xs text-red-600">{{ $errors->first('min_stock') }}</p> @endif
                 </div>
 
                 <p class="text-xs text-slate-500">
