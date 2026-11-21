@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             DailyLogSeeder::class,
             MemberSeeder::class,
             RewardSeeder::class,
+            ProductSeeder::class,
         ]);
     }
 }

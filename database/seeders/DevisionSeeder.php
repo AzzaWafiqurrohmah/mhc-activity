@@ -14,10 +14,19 @@ class DevisionSeeder extends Seeder
     public function run(): void
     {
         $divisions = [
-            'Kasir'   => 'kasir',
-            'Gudang'  => 'gudang',
-            'Display' => 'display',
-            'CS'      => 'cs',
+            // divisi yang sudah ada
+            'Kasir'      => 'kasir',
+            'Gudang'     => 'gudang',
+            'Display'    => 'display',
+            'CS'         => 'cs',
+
+            // divisi barang (dipakai untuk produk potong / mixing)
+            'Flooring'   => 'flooring',
+            'Cat'        => 'cat',
+            'Plumbing'   => 'plumbing',
+            'Kayu'       => 'kayu',
+            'Besi'       => 'besi',
+            'Elektrikal' => 'elektrikal',
         ];
 
         foreach ($divisions as $name => $code) {

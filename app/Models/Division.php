@@ -13,4 +13,5 @@ class Division extends Model
     }
     public function users() { return $this->hasMany(User::class); }
     public function tasks() { return $this->hasMany(Task::class); }
+    public function products() { return $this->hasMany(Product::class); }
 }

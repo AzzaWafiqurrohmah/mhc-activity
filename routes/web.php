@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DivisionController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Staff\DailyLogController;
 use App\Http\Controllers\Sm\LogController;
 use App\Http\Controllers\Sm\TodayController;
@@ -91,6 +92,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('users', UserController::class)->only(['index', 'store', 'update']);
     Route::patch('users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::patch('users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
+
+    Route::resource('products', ProductController::class)->only(['index', 'store', 'update']);
+    Route::patch('products/{product}/toggle', [ProductController::class, 'toggle'])->name('products.toggle');
+    Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
+    Route::get('products/template', [ProductController::class, 'template'])->name('products.template');
+    Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
 });
 
 // Route::resource('divisions', DivisionController::class)->only(['index', 'store', 'update']);

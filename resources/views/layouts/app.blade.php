@@ -15,6 +15,7 @@
             ['Akun',   'admin.users.index',     'admin.users.*'],
             ['Divisi', 'admin.divisions.index', 'admin.divisions.*'],
             ['Tugas',  'admin.tasks.index',     'admin.tasks.*'],
+            ['Produk', 'admin.products.index',  'admin.products.*'],
         ],
         \App\Role::Staff => [
             ['Aktivitas Harian', 'staff.dashboard', 'staff.dashboard'],
