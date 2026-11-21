@@ -294,8 +294,8 @@
                         {{-- Mesin scan mengirim Enter di akhir: pindah ke kolom nama, jangan kirim form --}}
                         <input id="product-barcode" type="text" name="barcode" x-model="barcode" x-ref="barcode"
                                @keydown.enter.prevent="$refs.name.focus()"
-                               class="field w-full font-mono" placeholder="Scan atau ketik barcode" autocomplete="off">
-                        <p class="mt-1.5 text-xs text-slate-500">Harus unik. Bisa langsung di-scan.</p>
+                               class="field w-full font-mono" placeholder="ketik barcode" autocomplete="off">
+                        <p class="mt-1.5 text-xs text-slate-500">Harus unik.</p>
                         @error('barcode')
                             <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>
                         @enderror
